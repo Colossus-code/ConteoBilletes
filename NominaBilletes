@@ -1,0 +1,231 @@
+import java.util.List;
+import java.util.Scanner;
+import com.google.common.base.Strings;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Colossus-code
+ */
+ 
+ // Clase donde va a ir el método main. 
+public class NominaBilletes {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        
+        // ATRIBUTOS
+        List <Empleado> employers = new ArrayList(); 
+        boolean ctrlSc = false; 
+        Scanner sc = new Scanner(System.in);
+        
+        // MENSAJE POR CONSOLA 
+        System.out.println("Bienvenido a Nominator, su programa de conteo de billetes.");
+        
+        // BUCLE DO WHILE PARA RECOGER NOMBRE Y SALARIO DE EMPLEADOS
+        do{
+            // Creamos un nuevo empleado. 
+            Empleado newEmployer = new Empleado();
+            
+            System.out.println("Por favor, introduzca el nombre del empleado.");
+            
+            newEmployer.setEmployerName(sc.nextLine());
+            
+            System.out.println("A continuación, por favor, introduzca el salario.");
+            // Controlamos con un try catch que el salario o el nombre no sean nulos. 
+            try{
+                
+                newEmployer.setEmployerSalary(sc.nextInt());
+                
+                if(!Strings.isNullOrEmpty(newEmployer.getEmployerName()) || !Strings.isNullOrEmpty(String.valueOf(newEmployer.getEmployerSalary()))){
+                
+                employers.add(newEmployer);
+            
+                }else{
+
+                    System.err.println("Debe introducir un valor correcto.");
+                }
+                
+            }catch(Exception e){
+                
+                System.out.println("");
+                System.err.println("Únicamente está permitido el uso de números enteros. ");
+                
+                
+            }finally{
+                // Para continuar añadiendo empleados. 
+                sc.nextLine();
+                System.out.println("¿Desea continuar añadiendo empleados? Y/N");
+            
+                String scannerAnswer = sc.nextLine(); 
+
+                if(scannerAnswer.equalsIgnoreCase("N")){
+
+                    ctrlSc = true;
+                // Controlamos que el usuario indique una opción válida. 
+                }else if(!scannerAnswer.equalsIgnoreCase("Y") && !scannerAnswer.equalsIgnoreCase("N") ){
+                    
+                    System.err.println("Por favor elija una opción correcta.");
+                }
+            }           
+
+        }while(ctrlSc == false);
+        // Creamos e inicializamos el objeto ContadorBilletes con los empleados y salarios de la lista employers. 
+        ContadorBilletes coinCounter = new ContadorBilletes(employers);
+        // Ejecutamos la función que aplica la lógica de la aplicación y printea el resultado. 
+        coinCounter.overListEmpoloyers();
+        
+    }
+    
+    
+}
+
+/**
+ *
+ * @author Colossus-code
+ */
+ 
+ // Clase del Empleado para poder crear lista. 
+public class Empleado {
+    
+    private String employerName; 
+    private int employerSalary; 
+
+    public Empleado() {
+    }
+
+    public String getEmployerName() {
+        return employerName;
+    }
+
+    public void setEmployerName(String employerName) {
+        this.employerName = employerName;
+    }
+
+    public int getEmployerSalary() {
+        return employerSalary;
+    }
+
+    public void setEmployerSalary(int employerSalary) {
+        this.employerSalary = employerSalary;
+    }
+
+    @Override
+    public String toString() {
+        return "El empleado se llama: " + employerName + ", el salario del empleado es: " + employerSalary;
+    }
+    
+
+}
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ *
+ * @author Colossus-code
+ */
+ // Lógica de la aplicación 
+public class ContadorBilletes {
+    
+    // Variables de la clase que se empleand para reflejar la información
+    private List<Empleado> empList = null;
+    private int totalAmount;
+    private int salary;
+    
+    //Variables para el recorrido de tipo de moneda y cantidad.
+    // El HashMap almacena la posición de value y la iteración de veces que se aplica dicho billete.
+    private final int[] value = {500,200,100,50,20,10,5,2,1};
+    private HashMap<Integer,Integer> count = null;
+    // Iterador para recoger cuántas veces podemos aplicar un billete. 
+    private int x = 0; 
+    // Iterador para recorrer el array value con los billetes y para la key del hashmap. 
+    private int i = 0;
+
+    public ContadorBilletes(List<Empleado> emp) {
+        this.empList = emp;
+    }
+    
+    public void overListEmpoloyers(){
+        
+        for(Empleado emp : empList){
+            
+            x= 0;
+            i = 0;
+            // Creamos la cuenta del nuevo empleado. 
+            count = new HashMap();
+            // Instanciamos la variable salary
+            salary = emp.getEmployerSalary(); 
+            // Añadimos a la variable de cantidad total la cantidad del salario.  
+            totalAmount += salary;
+            
+            while(salary >= 0){
+                addAndContability(i);
+                count.put(i, x);
+                // Añade la posición actual de i e x en el hashmap 
+            }
+           // Una vez se ha recorrido el array de monedas posibles se realiza el print formateado del número de billetes que corresponden. 
+           System.err.println("__________________________________________________________________________________________________________________________________________");
+           System.err.println("El empleado " + emp.getEmployerName() + ", con un salario de: " + emp.getEmployerSalary() + " euros, ha de cobrar un total de:");
+
+            for(int z = 0; z <= value.length -1; z++){
+
+               System.err.print("Billetes de " + value[z] + ": " + count.get(z) + "\n"); 
+           
+            }
+            System.err.println("__________________________________________________________________________________________________________________________________________");
+
+        }
+      // Finalmente, una vez recorrido el bucle y la lista de empleados se indica el dinero total a pagar. 
+        System.err.println("El dinero total a pagar es: " + totalAmount);
+    }
+  
+    // Método que se encarga de comprobar si el salario es mayor o igual al billete representado por el array. 
+    public void addAndContability(int positionI){
+        
+        // Si el salario es mayor quiere decir que se puede restar, por lo que aumentara +1 el iterador de veces que se repite el billete y lo restará del salario. 
+        if (salary >= value[positionI]){
+            x++;
+            salary = salary - value[positionI];
+        }else{
+            findNext(positionI);
+            salary = salary - value[i];
+           
+        }  
+        //En caso contrario empleará la función findNext con el argumento de entrada positionI, es decir, la posición del billete actual en el array. 
+    }
+    
+  // Método para la búsqueda del siguiente valor de i
+        public void findNext(int iterator){
+        
+        while(true){
+           
+            if(i >= 8 && salary < value[iterator] || salary == 0){
+                break;
+                
+            }else if(salary >= value[iterator]){
+                i = iterator;
+                x++;
+                count.put(i, x); // Esta instrucción podría eliminarse ya que se repite en el bucle en el que esta encapsulado el método, sin embargo 
+                //lo dejamos ya que los valores se mantienen en la misma posición
+                break;
+            // En caso de que encuentre un valor mayor, moverá el valor de i hasta la posición inidcada, añadirá +1 a la cantidad de dicha posición en el hashmap y saldrá del bucle.
+            }else{
+                iterator++;
+                x = 0;
+            // En caso de que el valor de i no sea mayor que 8 y el salario sea <1 o 0 moverá el iterador de i una posición y repetirá el bucle para realizar las comprobaciones.  
+            }
+        }
+    }
+
+    public int getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(int totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+ 
+}
